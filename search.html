@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevJobs — Searchable Listing Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header Navigation -->
+    <header class="border-b border-slate-800 bg-slate-950/60 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-500/30 text-white">
+                    D
+                </div>
+                <div>
+                    <span class="font-bold text-lg tracking-tight text-white block leading-none">DevJobs Hub</span>
+                    <span class="text-xs text-slate-400">Searchable Listing Dashboard</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 text-sm">
+                <span class="hidden sm:inline px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 font-medium">Total Roles: <span id="total-count" class="text-indigo-400 font-bold">12</span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Container -->
+    <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow">
+        
+        <!-- Search & Control Toolbar -->
+        <div class="bg-slate-800/80 border border-slate-700/80 rounded-3xl p-6 shadow-2xl backdrop-blur-xl mb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                
+                <!-- Live Search Input -->
+                <div class="lg:col-span-5 relative">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </span>
+                    <input type="text" id="search-input" placeholder="Search by title, skills (React, Python), or keywords..." 
+                        class="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-500 transition-all">
+                </div>
+
+                <!-- Domain Filter Dropdown -->
+                <div class="lg:col-span-3">
+                    <select id="domain-filter" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500 transition-all">
+                        <option value="all">All Domains</option>
+                        <option value="Frontend">Frontend</option>
+                        <option value="Backend">Backend</option>
+                        <option value="Full Stack">Full Stack</option>
+                        <option value="AI & Data">AI & Data</option>
+                        <option value="DevOps">DevOps</option>
+                    </select>
+                </div>
+
+                <!-- Experience Level Dropdown -->
+                <div class="lg:col-span-2">
+                    <select id="experience-filter" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500 transition-all">
+                        <option value="all">All Experience</option>
+                        <option value="Junior">Junior</option>
+                        <option value="Mid">Mid Level</option>
+                        <option value="Senior">Senior</option>
+                    </select>
+                </div>
+
+                <!-- Sorting Dropdown -->
+                <div class="lg:col-span-2">
+                    <select id="sort-select" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500 transition-all">
+                        <option value="newest">Sort: Newest</option>
+                        <option value="alphabetical">Sort: A-Z</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- Quick Remote Toggle & Active Filters Bar -->
+            <div class="mt-4 pt-4 border-t border-slate-700/60 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="remote-toggle" class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                        <span class="ml-3 text-xs font-semibold text-slate-300">Remote Only</span>
+                    </label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-400">Showing <span id="showing-count" class="text-white font-bold">12</span> of 12 listings</span>
+                    <button id="reset-filters" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold underline ml-2">Reset Filters</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Listing Cards Grid Container -->
+        <div id="listings-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic Cards Render Here -->
+        </div>
+
+        <!-- Empty State View (Hidden by default) -->
+        <div id="empty-state" class="hidden text-center py-20 bg-slate-800/40 border border-slate-700/60 rounded-3xl p-8">
+            <div class="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto mb-4 text-rose-400 text-2xl">
+                🔍
+            </div>
+            <h3 class="text-xl font-bold text-white">No matching listings found</h3>
+            <p class="text-slate-400 text-sm mt-1 max-w-md mx-auto">Try adjusting your search keywords, clearing filters, or resetting the criteria to view available opportunities.</p>
+            <button onclick="resetAllFilters()" class="mt-6 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 transition-all">
+                Clear All Filters
+            </button>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div id="pagination-container" class="mt-12 flex items-center justify-center gap-2">
+            <!-- Dynamic Pagination Buttons -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 text-slate-500 py-6 text-center text-xs">
+        <p>© 2026 DevJobs Hub. Built with HTML5, Tailwind CSS, and Vanilla JavaScript[cite: 3].</p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Sample Mock JSON Dataset (12 distinct listing entries)[cite: 3]
+        const listingsData = [
+            {
+                id: 1,
+                title: "Senior React & Tailwind Developer",
+                company: "CloudScale Tech",
+                domain: "Frontend",
+                experience: "Senior",
+                remote: true,
+                location: "San Francisco, CA",
+                salary: "$140k - $170k",
+                date: "2026-10-10",
+                skills: ["React", "Tailwind CSS", "JavaScript", "TypeScript"],
+                description: "Build high-performance web applications and responsive design systems using React and modern component libraries."
+            },
+            {
+                id: 2,
+                title: "Full Stack AI Engineer",
+                company: "NeuralFlow AI",
+                domain: "AI & Data",
+                experience: "Mid",
+                remote: true,
+                location: "New York, NY",
+                salary: "$130k - $160k",
+                date: "2026-10-12",
+                skills: ["Python", "FastAPI", "PyTorch", "React"],
+                description: "Integrate large language models and multimodal inference pipelines into scalable web services."
+            },
+            {
+                id: 3,
+                title: "Backend Go / Node.js Developer",
+                company: "DataVortex Systems",
+                domain: "Backend",
+                experience: "Senior",
+                remote: false,
+                location: "Austin, TX",
+                salary: "$150k - $180k",
+                date: "2026-10-05",
+                skills: ["Go", "Node.js", "PostgreSQL", "Docker"],
+                description: "Design low-latency distributed microservices and robust database architectures for high-traffic platforms."
+            },
+            {
+                id: 4,
+                title: "Junior Frontend Engineer",
+                company: "PixelCraft Agency",
+                domain: "Frontend",
+                experience: "Junior",
+                remote: true,
+                location: "Remote (Global)",
+                salary: "$70k - $90k",
+                date: "2026-10-14",
+                skills: ["HTML5", "CSS3", "JavaScript", "Tailwind CSS"],
+                description: "Create pixel-perfect landing pages and interactive dashboards with smooth CSS animations."
+            },
+            {
+                id: 5,
+                title: "DevOps & Cloud Infrastructure Lead",
+                company: "CyberShield Corp",
+                domain: "DevOps",
+                experience: "Senior",
+                remote: true,
+                location: "Seattle, WA",
+                salary: "$160k - $200k",
+                date: "2026-09-28",
+                skills: ["AWS", "Kubernetes", "Terraform", "CI/CD"],
+                description: "Manage secure multi-cloud environments, automated deployments, and continuous security scanning."
+            },
+            {
+                id: 6,
+                title: "Full Stack Product Engineer",
+                company: "SaaSify Inc",
+                domain: "Full Stack",
+                experience: "Mid",
+                remote: true,
+                location: "Boston, MA",
+                salary: "$115k - $145k",
+                date: "2026-10-09",
+                skills: ["React", "Node.js", "Express", "MongoDB"],
+                description: "Own end-to-end feature development from database schema design to frontend state management."
+            },
+            {
+                id: 7,
+                title: "Computer Vision Research Engineer",
+                company: "Visionary AI Labs",
+                domain: "AI & Data",
+                experience: "Senior",
+                remote: false,
+                location: "San Jose, CA",
+                salary: "$170k - $210k",
+                date: "2026-10-01",
+                skills: ["Python", "YOLOv8", "PyTorch", "OpenCV"],
+                description: "Train and optimize object detection and image segmentation models for edge hardware."
+            },
+            {
+                id: 8,
+                title: "Junior Backend Developer",
+                company: "FinTech Solutions",
+                domain: "Backend",
+                experience: "Junior",
+                remote: false,
+                location: "Chicago, IL",
+                salary: "$80k - $100k",
+                date: "2026-10-13",
+                skills: ["Python", "Django", "SQL", "Git"],
+                description: "Build secure REST APIs and handle payment gateway integrations with robust unit testing."
+            },
+            {
+                id: 9,
+                title: "UI/UX Frontend Specialist",
+                company: "DesignCraft Studio",
+                domain: "Frontend",
+                experience: "Mid",
+                remote: true,
+                location: "Denver, CO",
+                salary: "$105k - $130k",
+                date: "2026-10-08",
+                skills: ["Vue.js", "Tailwind CSS", "Figma", "JavaScript"],
+                description: "Bridge the gap between design and code by building accessible, responsive component libraries."
+            },
+            {
+                id: 10,
+                title: "Senior Full Stack Architect",
+                company: "Enterprise Scale",
+                domain: "Full Stack",
+                experience: "Senior",
+                remote: true,
+                location: "New York, NY",
+                salary: "$180k - $220k",
+                date: "2026-09-25",
+                skills: ["React", "TypeScript", "GraphQL", "AWS"],
+                description: "Lead technical roadmap, code quality standards, and system architecture across distributed teams."
+            },
+            {
+                id: 11,
+                title: "Data Analyst & BI Specialist",
+                company: "MetricsHub",
+                domain: "AI & Data",
+                experience: "Junior",
+                remote: true,
+                location: "Atlanta, GA",
+                salary: "$75k - $95k",
+                date: "2026-10-11",
+                skills: ["SQL", "Python", "Pandas", "Tableau"],
+                description: "Analyze user engagement funnels and build interactive executive dashboards for business metrics."
+            },
+            {
+                id: 12,
+                title: "Site Reliability Engineer (SRE)",
+                company: "Global Net",
+                domain: "DevOps",
+                experience: "Mid",
+                remote: false,
+                location: "Austin, TX",
+                salary: "$125k - $155k",
+                date: "2026-10-04",
+                skills: ["Linux", "Docker", "Prometheus", "Python"],
+                description: "Maintain 99.99% uptime, monitor system health metrics, and respond to incident escalations."
+            }
+        ];
+
+        // Application State
+        let searchQuery = "";
+        let selectedDomain = "all";
+        let selectedExperience = "all";
+        let remoteOnly = false;
+        let sortBy = "newest";
+        let currentPage = 1;
+        const itemsPerPage = 6;
+        let debounceTimer = null;
+
+        // DOM Elements
+        const searchInput = document.getElementById("search-input");
+        const domainFilter = document.getElementById("domain-filter");
+        const experienceFilter = document.getElementById("experience-filter");
+        const sortSelect = document.getElementById("sort-select");
+        const remoteToggle = document.getElementById("remote-toggle");
+        const listingsGrid = document.getElementById("listings-grid");
+        const emptyState = document.getElementById("empty-state");
+        const paginationContainer = document.getElementById("pagination-container");
+        const showingCount = document.getElementById("showing-count");
+        const totalCount = document.getElementById("total-count");
+        const resetFiltersBtn = document.getElementById("reset-filters");
+
+        totalCount.textContent = listingsData.length;
+
+        // Event Listeners with Debounced Search
+        searchInput.addEventListener("input", (e) => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                searchQuery = e.target.value.toLowerCase().trim();
+                currentPage = 1;
+                renderDashboard();
+            }, 250); // 250ms debouncing delay
+        });
+
+        domainFilter.addEventListener("change", (e) => {
+            selectedDomain = e.target.value;
+            currentPage = 1;
+            renderDashboard();
+        });
+
+        experienceFilter.addEventListener("change", (e) => {
+            selectedExperience = e.target.value;
+            currentPage = 1;
+            renderDashboard();
+        });
+
+        sortSelect.addEventListener("change", (e) => {
+            sortBy = e.target.value;
+            renderDashboard();
+        });
+
+        remoteToggle.addEventListener("change", (e) => {
+            remoteOnly = e.target.checked;
+            currentPage = 1;
+            renderDashboard();
+        });
+
+        resetFiltersBtn.addEventListener("click", resetAllFilters);
+
+        function resetAllFilters() {
+            searchQuery = "";
+            searchInput.value = "";
+            selectedDomain = "all";
+            domainFilter.value = "all";
+            selectedExperience = "all";
+            experienceFilter.value = "all";
+            remoteOnly = false;
+            remoteToggle.checked = false;
+            sortBy = "newest";
+            sortSelect.value = "newest";
+            currentPage = 1;
+            renderDashboard();
+        }
+
+        // Core Filtering, Sorting & Rendering Logic
+        function renderDashboard() {
+            // 1. Filter (Logical AND combination)[cite: 3]
+            let filtered = listingsData.filter(item => {
+                const matchesSearch = searchQuery === "" || 
+                    item.title.toLowerCase().includes(searchQuery) ||
+                    item.company.toLowerCase().includes(searchQuery) ||
+                    item.skills.some(skill => skill.toLowerCase().includes(searchQuery));
+
+                const matchesDomain = selectedDomain === "all" || item.domain === selectedDomain;
+                const matchesExperience = selectedExperience === "all" || item.experience === selectedExperience;
+                const matchesRemote = !remoteOnly || item.remote === true;
+
+                return matchesSearch && matchesDomain && matchesExperience && matchesRemote;
+            });
+
+            // 2. Sort Listings
+            if (sortBy === "newest") {
+                filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            } else if (sortBy === "alphabetical") {
+                filtered.sort((a, b) => a.title.localeCompare(b.title));
+            }
+
+            showingCount.textContent = filtered.length;
+
+            // 3. Handle Empty State vs Results Grid
+            if (filtered.length === 0) {
+                listingsGrid.innerHTML = "";
+                emptyState.classList.remove("hidden");
+                paginationContainer.innerHTML = "";
+                return;
+            } else {
+                emptyState.classList.add("hidden");
+            }
+
+            // 4. Pagination
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            if (currentPage > totalPages) currentPage = totalPages || 1;
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const paginatedItems = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+            // 5. Render Listing Cards
+            listingsGrid.innerHTML = paginatedItems.map(item => `
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 shadow-lg flex flex-col justify-between hover:border-indigo-500/50 transition-all group">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">${item.domain}</span>
+                            <span class="text-xs font-medium text-slate-400">${item.experience}</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors">${item.title}</h3>
+                        <p class="text-sm font-medium text-slate-300 mt-1">${item.company} • <span class="text-slate-400 text-xs">${item.location}</span></p>
+                        <p class="text-sm text-slate-400 mt-3 line-clamp-2 leading-relaxed">${item.description}</p>
+                        
+                        <!-- Skills Tags -->
+                        <div class="mt-4 flex flex-wrap gap-1.5">
+                            ${item.skills.map(skill => `<span class="px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-700/80 text-xs font-medium text-slate-300">${skill}</span>`).join('')}
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-700/60 flex items-center justify-between">
+                        <span class="text-sm font-extrabold text-emerald-400">${item.salary}</span>
+                        <a href="#apply" onclick="alert('Thank you for applying to ${item.title} at ${item.company}!'); return false;" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md shadow-indigo-600/30 transition-all">
+                            Apply Now
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+
+            // 6. Render Pagination Buttons
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            if (totalPages <= 1) {
+                paginationContainer.innerHTML = "";
+                return;
+            }
+
+            let html = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const isActive = i === currentPage;
+                html += `
+                    <button onclick="changePage(${i})" class="w-10 h-10 rounded-xl font-bold text-sm transition-all ${isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700'}">
+                        ${i}
+                    </button>
+                `;
+            }
+            paginationContainer.innerHTML = html;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            renderDashboard();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initial Render
+        renderDashboard();
+    </script>
+</body>
+</html>
